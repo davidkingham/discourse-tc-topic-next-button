@@ -1,13 +1,14 @@
 import Component from "@glimmer/component";
-import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
+import { action } from "@ember/object";
+import { service } from "@ember/service";
+import DButton from "discourse/components/d-button";
 import {
   nextTopicUrl,
   previousTopicUrl,
   setTopicId,
 } from "discourse/lib/topic-list-tracker";
 import DiscourseURL from "discourse/lib/url";
-import { inject as service } from "@ember/service";
 
 // Topic URLs look like [/basePath]/t/<slug>/<id>[/<post>]
 function topicIdFromUrl(url) {
@@ -15,7 +16,7 @@ function topicIdFromUrl(url) {
   return match ? parseInt(match[1], 10) : null;
 }
 
-export default class TopicNextButton extends Component {
+export default class TopicNext extends Component {
   @service site;
   @tracked showButton = false;
 
@@ -29,6 +30,10 @@ export default class TopicNextButton extends Component {
     });
   }
 
+  get topic() {
+    return this.args.outletArgs?.topic;
+  }
+
   get shouldShow() {
     return this.showButton && this.showInCategory;
   }
@@ -38,12 +43,12 @@ export default class TopicNextButton extends Component {
       settings.topic_next_categories === "" ||
       settings.topic_next_categories
         .split("|")
-        .includes(`${this.args.topic?.category_id}`)
+        .includes(`${this.topic?.category_id}`)
     );
   }
 
-  get goFirst() {
-    return settings.topic_next_always_go_to_first_post;
+  get label() {
+    return this.site.desktopView ? themePrefix("topic_next_label") : null;
   }
 
   // nextTopicUrl() is a stateful iterator step on the shared
@@ -52,7 +57,7 @@ export default class TopicNextButton extends Component {
   // step forward and back proves the current topic is really in the list,
   // and setTopicId() leaves the shared pointer where core expects it.
   async validatedNextUrl() {
-    const currentTopicId = this.args.topic?.id;
+    const currentTopicId = this.topic?.id;
     if (!currentTopicId) {
       return null;
     }
@@ -81,10 +86,23 @@ export default class TopicNextButton extends Component {
     }
 
     let target = url;
-    if (this.goFirst) {
+    if (settings.topic_next_always_go_to_first_post) {
       const match = url.match(/^(.*?\/t\/[^/]+\/\d+)/);
       target = match ? match[1] : url;
     }
     DiscourseURL.routeTo(target);
   }
+
+  <template>
+    {{#if this.shouldShow}}
+      <span class="topic-next">
+        <DButton
+          class="topic-next-button"
+          @action={{this.goToNextTopic}}
+          @icon="chevron-right"
+          @label={{this.label}}
+        />
+      </span>
+    {{/if}}
+  </template>
 }
