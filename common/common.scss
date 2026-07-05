@@ -10,11 +10,6 @@
   color: $secondary;
   transition: color 0s;
 
-  .svg-icon,
-  .svg-icon-title {
-    height: 2.15em;
-  }
-
   @include hover {
     background-color: $tertiary-medium;
     color: $secondary;
