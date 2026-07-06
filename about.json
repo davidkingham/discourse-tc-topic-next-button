@@ -1,6 +1,6 @@
 {
   "name": "Topic Next Button",
-  "about_url": "",
+  "about_url": "https://github.com/davidkingham/discourse-tc-topic-next-button",
   "component": true,
   "modifiers": {
     "svg_icons": ["chevron-right"]
